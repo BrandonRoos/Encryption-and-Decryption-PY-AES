@@ -5,6 +5,7 @@ This project is a simple GUI application for encrypting and decrypting messages 
 <img src="https://img.shields.io/badge/-Python%20Cryptography-3776AB?style=for-the-badge&logo=python&logoColor=white" />
   
 </div>
+
 ## Features
 
 - Generate a random key for encryption and decryption.
