@@ -1,57 +1,66 @@
 # Encryption and Decryption GUI
 
-This project is a simple GUI application for encrypting and decrypting messages using the `cryptography` library and the `Fernet` symmetric encryption method. The GUI is built using `tkinter`, a standard Python interface to the Tk GUI toolkit.
+A simple GUI application for encrypting and decrypting messages using the `cryptography` library's `Fernet` recipe. Fernet provides authenticated symmetric encryption built on **AES-128 in CBC mode** with an **HMAC-SHA256** signature for integrity, so altered ciphertext fails to decrypt rather than returning corrupted data. The interface is built with `tkinter`, Python's standard GUI toolkit.
+
 <div>
 <img src="https://img.shields.io/badge/-Python%20Cryptography-3776AB?style=for-the-badge&logo=python&logoColor=white" />
-  
 </div>
 
 ## Features
 
-- Generate a random key for encryption and decryption.
-- Encrypt messages entered by the user.
-- Decrypt encrypted messages.
+- Generates an encryption key at runtime (kept local, never committed to the repo).
+- Encrypts messages entered by the user.
+- Decrypts encrypted messages.
+- Verifies integrity automatically via Fernet's built-in HMAC.
+
+## A Note on Fernet vs. "raw" AES
+
+Fernet is a higher-level wrapper around AES rather than a bare implementation, and that's intentional — it bundles a secure mode (CBC), random IV generation, and message authentication together, avoiding the classic mistakes of hand-rolled AES (reused IVs, missing integrity checks, ECB mode). If raw AES with manual mode selection is ever needed, the `cryptography` library's `Cipher` API supports that directly.
 
 ## Prerequisites
 
-Before you begin, ensure you have met the following requirements:
-
 - Python 3.x installed on your machine.
-- The `cryptography` library installed. You can install it using pip:
-- The `tkinter` library installed for creating the graphical user interface (GUI). Tkinter is Python's standard GUI toolkit and is necessary to build and display the windowed interface for this application.
+- The `cryptography` library, installed with pip:
 
 ```bash
-pip install tkinter
 pip install cryptography
 ```
 
-## Working GUI 
+Tkinter is Python's standard GUI toolkit and ships with most Python installations, so it usually does not need to be installed separately. (On some Linux distributions it's available through the system package manager, e.g. `sudo apt install python3-tk`.)
+
+## Working GUI
+
 ![Screenshot of gui](https://github.com/BrandonRoos/Encryption-and-Decryption-PY-AES/assets/28285286/cf699e80-c8ae-4c33-81bf-b603be465d47)
 
 ## Code Structure
-The program consists of several functions that serve specific purposes:
 
-- `generate_key`: This function generates a random key for encryption and decryption and saves it in a file called key.key.
-- `encrypt_message`: This function reads the encryption key from key.key, uses it to create a Fernet cipher, encrypts the input message using AES encryption, and displays the encrypted message in the GUI.
-- `decrypt_message`: This function reads the encryption key from key.key, uses it to create a Fernet cipher, decrypts the input encrypted message, and displays the decrypted message in the GUI.
-- `main_screen`: This function creates the main GUI window using tkinter. It includes text entry fields for the original message, the encrypted message, and the decrypted message, along with buttons for encryption and decryption. The generate_key function is called to create the encryption key at the start.
+The program is organized into a few focused functions:
+
+- `generate_key`: Generates a Fernet key at runtime and saves it locally to `key.key`. This file is git-ignored and should never be committed.
+- `encrypt_message`: Loads the key, creates a Fernet cipher, encrypts the input message, and displays the ciphertext in the GUI.
+- `decrypt_message`: Loads the key, decrypts the ciphertext, and displays the result — automatically failing if integrity verification fails.
+- `main_screen`: Builds the main tkinter window with entry fields for the original, encrypted, and decrypted messages plus the encrypt/decrypt controls. `generate_key` is called at startup.
 
 ## How to Use
-Follow these steps to use the program:
-1. Run the Program: Run the Python script, and a GUI window will appear.
-2. Enter a Message: In the "Enter a message" field, type the message you want to encrypt.
-3. Encryption: Click the "Encrypt" button to encrypt the message. The encrypted message will appear in the "Encrypted message" field.
-4. Decryption: To decrypt the message, click the "Decrypt" button. The decrypted message will appear in the "Decrypted message" field.
-5. Key Generation: The program generates an encryption key (key.key) automatically at the start. This key is used for both encryption and decryption. You don't need to manage the key; it's handled by the program.
-6. Copy to Clipboard (Optional): You can copy the decrypted message to your clipboard by selecting and copying it from the "Decrypted message" field.
-7. Handling Errors: If there are any errors during encryption or decryption, an error message will be displayed in a pop-up window.
 
+1. **Run the program:** Launch the Python script and the GUI window appears.
+2. **Enter a message:** Type your message in the "Enter a message" field.
+3. **Encrypt:** Click "Encrypt" — the ciphertext appears in the "Encrypted message" field.
+4. **Decrypt:** Click "Decrypt" — the original text appears in the "Decrypted message" field.
+5. **Key generation:** A key (`key.key`) is generated automatically at startup and used for both operations; you don't need to manage it manually.
+6. **Copy to clipboard (optional):** Select and copy the result from the message field.
+7. **Error handling:** Any errors during encryption or decryption surface in a pop-up dialog.
 
-## Customization
-This code provides a basic example of AES encryption and decryption using tkinter. You can customize and enhance it further according to your specific requirements, such as implementing more secure key management practices or adding additional features to the GUI.
+## Security Notes
 
-**Please note**: This code is for educational purposes and my portfolio. For real-world applications, you should consider additional security measures and key management practices. I will add more security measures in later versions. This code is a living document. Also, note this will be the first real code I am publishing on GitHub. Hello, World! and thank you for reading.
+- **Key handling.** The key lives in `key.key`, generated locally and excluded via `.gitignore`. Anyone with the key can decrypt the data, so a real deployment should store it in a secrets manager or OS keychain rather than a flat file — never commit it to a repository.
+- **Scope.** This is a learning and portfolio project demonstrating applied symmetric cryptography. Production use would add key rotation, key derivation (e.g., PBKDF2 or Argon2 from a user password), and secure key storage.
 
+## Possible Improvements
+
+- Password-derived keys via a KDF so users aren't managing a raw key file.
+- File encryption in addition to text.
+- Key rotation support.
 
 
   
